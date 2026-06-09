@@ -188,8 +188,8 @@
   #tab-billshare .bs-sumbox .bs-money { font-size: 13px; font-weight: 700; color: var(--text); }
   #tab-billshare .bs-total-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 10px; border-radius: 10px; background: #5C3017; color: #F5E6C8; font-weight: 700; font-size: 14px; }
   #tab-billshare .bs-bill-list { display: flex; flex-direction: column; gap: 8px; }
-  #tab-billshare .bs-bill-card { border: 1.5px solid #C4A882; background: var(--surface); border-radius: 12px; padding: 12px; cursor: pointer; transition: border-color .15s; }
-  #tab-billshare .bs-bill-card.active { border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 1px var(--primary); }
+  #tab-billshare .bs-bill-card { border: 2px solid #C4A882; background: var(--surface); border-radius: 12px; padding: 12px; cursor: pointer; transition: all .15s; }
+  #tab-billshare .bs-bill-card.active { border: 3px solid #2E7D32; background: #E8F5E9; box-shadow: 0 0 0 4px rgba(46,125,50,0.22), 0 4px 16px rgba(46,125,50,0.18); transform: scale(1.013); }
   #tab-billshare .bs-bill-card.cleared { opacity: .65; }
   #tab-billshare .bs-bill-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; color: var(--text); }
   #tab-billshare .bs-bill-date { font-size: 12px; color: var(--gray); }
@@ -208,6 +208,22 @@
   #tab-billshare input:focus, #tab-billshare select:focus { border-color: var(--primary); }
   #tab-billshare .bs-settle-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 10px; background: var(--surface); border: 1px solid #C4A882; margin-bottom: 6px; font-size: 13px; }
   #tab-billshare .bs-settle-title { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; margin: 10px 0 6px; }
+  #tab-billshare .bs-sumbox-tap { cursor: pointer; transition: transform .1s, box-shadow .1s; }
+  #tab-billshare .bs-sumbox-tap:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(92,48,23,.2); }
+  #tab-billshare .bs-sumbox-tap:active { transform: scale(.97); }
+  /* Person detail bottom sheet */
+  .bs-detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 300; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .bs-detail-overlay.show { opacity: 1; pointer-events: all; }
+  .bs-detail-sheet { background: var(--card); border-radius: 20px 20px 0 0; width: 100%; max-width: 430px; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform .25s; }
+  .bs-detail-overlay.show .bs-detail-sheet { transform: translateY(0); }
+  .bs-detail-handle { width: 36px; height: 4px; background: #C4A882; border-radius: 2px; margin: 10px auto 0; flex-shrink: 0; }
+  .bs-detail-title { font-size: 15px; font-weight: 700; color: var(--text); padding: 12px 16px 8px; flex-shrink: 0; border-bottom: 1px solid #E0C8A0; }
+  .bs-detail-body { overflow-y: auto; padding: 10px 16px 24px; flex: 1; }
+  .bs-detail-bill { margin-bottom: 12px; }
+  .bs-detail-bill-name { font-size: 12px; font-weight: 700; color: #7A5A3A; margin-bottom: 4px; padding: 3px 8px; background: #F0E4CC; border-radius: 6px; display: inline-block; }
+  .bs-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #EFE0C8; font-size: 13px; }
+  .bs-detail-row:last-child { border-bottom: none; }
+  .bs-detail-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; padding: 10px 0 0; border-top: 2px solid #C4A882; margin-top: 6px; color: var(--text); }
   #tab-billshare .bs-tag { display: inline-block; padding: 3px 8px; border-radius: 6px; background: #E8D8B8; color: var(--primary); font-size: 11px; font-weight: 600; margin: 2px 2px 0 0; }
   #tab-billshare .bs-payer-badge { display: inline-flex; align-items: center; background: #5C3017; color: #F5E6C8; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
   #tab-billshare .bs-cleared-badge { display: inline-block; background: var(--green); color: #F0F8E8; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
@@ -317,23 +333,23 @@
 
       <!-- สรุปรวมทุกบิล -->
       <!-- สรุปรวมทุกบิล — สีน้ำตาลเข้ม -->
-      <div class="bs-card" style="border-left:4px solid #5C3017">
+      <div class="bs-card" style="border-left:4px solid #5C3017;background:#FFF3E8">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#5C3017">💰 สรุปรวมทุกบิล</span>
           <span style="font-size:12px;color:var(--gray)" id="bsBillCountText">0 บิล</span>
         </div>
         <div class="bs-summary">
-          <div class="bs-sumbox"><div class="bs-label">แม่</div><div class="bs-money" id="bsAllMom">฿0.00</div></div>
-          <div class="bs-sumbox"><div class="bs-label">บิว</div><div class="bs-money" id="bsAllPartner">฿0.00</div></div>
-          <div class="bs-sumbox"><div class="bs-label">เรา</div><div class="bs-money" id="bsAllMe">฿0.00</div></div>
-          <div class="bs-sumbox"><div class="bs-label">น้อง</div><div class="bs-money" id="bsAllNong">฿0.00</div></div>
+          <div class="bs-sumbox bs-sumbox-tap" onclick="bsShowPersonDetail('mom')"><div class="bs-label">แม่ 👆</div><div class="bs-money" id="bsAllMom">฿0.00</div></div>
+          <div class="bs-sumbox bs-sumbox-tap" onclick="bsShowPersonDetail('partner')"><div class="bs-label">บิว 👆</div><div class="bs-money" id="bsAllPartner">฿0.00</div></div>
+          <div class="bs-sumbox bs-sumbox-tap" onclick="bsShowPersonDetail('me')"><div class="bs-label">เรา 👆</div><div class="bs-money" id="bsAllMe">฿0.00</div></div>
+          <div class="bs-sumbox bs-sumbox-tap" onclick="bsShowPersonDetail('nong')"><div class="bs-label">น้อง 👆</div><div class="bs-money" id="bsAllNong">฿0.00</div></div>
         </div>
         <div class="bs-total-bar"><span>ยอดรวมทุกบิล</span><span id="bsAllGrand">฿0.00</span></div>
         <div id="bsSettlementBox" style="margin-top:10px"></div>
       </div>
 
       <!-- เพิ่มบิล — สีทอง -->
-      <div class="bs-card" style="border-left:4px solid #A07828">
+      <div class="bs-card" style="border-left:4px solid #A07828;background:#FFFBE8">
         <div class="bs-card-header"><span class="bs-card-title" style="color:#A07828">➕ เพิ่มบิล</span></div>
         <div class="bs-form-group">
           <label class="bs-field-label">ชื่อร้าน</label>
@@ -342,7 +358,8 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div class="bs-form-group">
             <label class="bs-field-label">วันที่</label>
-            <input id="bsBillDate" type="date">
+            <input type="date" id="bsBillDate"
+              style="border:1.5px solid #C4A882;border-radius:8px;padding:7px 10px;font-size:14px;background:var(--card);color:var(--text);width:100%">
           </div>
           <div class="bs-form-group">
             <label class="bs-field-label">ใครจ่าย</label>
@@ -354,15 +371,13 @@
             </select>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">
+        <div style="margin-top:4px">
           <button class="bs-btn bs-btn-dark" onclick="bsAddBill()">+ เพิ่มบิล</button>
-          <button class="bs-btn bs-btn-green" onclick="bsSaveData(true)">💾 บันทึก</button>
-          <button class="bs-btn bs-btn-red" onclick="bsClearAll()">🗑️ ล้าง</button>
         </div>
       </div>
 
       <!-- รายการบิล — สีเขียวทหาร -->
-      <div class="bs-card" style="border-left:4px solid #4A5A30">
+      <div class="bs-card" style="border-left:4px solid #4A5A30;background:#EEF3E8">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#4A5A30">📋 บิลทั้งหมด</span>
           <span style="font-size:12px;color:var(--gray)">แตะเพื่อเลือก</span>
@@ -371,7 +386,7 @@
       </div>
 
       <!-- เพิ่มสินค้า — สีเทาน้ำเงิน -->
-      <div class="bs-card" style="border-left:4px solid #4F5E62">
+      <div class="bs-card" style="border-left:4px solid #4F5E62;background:#EBF2F5">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#4F5E62">🛒 เพิ่มสินค้า</span>
           <span style="font-size:12px;color:var(--gray)" id="bsActiveBillText">ยังไม่เลือกบิล</span>
@@ -413,7 +428,7 @@
       </div>
 
       <!-- สแกนใบเสร็จ OCR — สีหนัง -->
-      <div class="bs-card" style="border-left:4px solid #7A5A3A">
+      <div class="bs-card" style="border-left:4px solid #7A5A3A;background:#F5EDE0">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#7A5A3A">📷 สแกนใบเสร็จ</span>
           <span style="font-size:12px;color:var(--gray)" id="bsOcrActiveBill">ยังไม่เลือกบิล</span>
@@ -450,7 +465,7 @@
       </div>
 
       <!-- สรุปบิลที่เลือก — สีแดงอิฐ -->
-      <div class="bs-card" style="border-left:4px solid #903729">
+      <div class="bs-card" style="border-left:4px solid #903729;background:#FFF0EE">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#903729">📊 สรุปบิลที่เลือก</span>
           <span style="font-size:12px;color:var(--gray)" id="bsSelectedBillTitle">-</span>
@@ -465,7 +480,7 @@
       </div>
 
       <!-- รายการสินค้า — สีน้ำตาลกลาง -->
-      <div class="bs-card" style="border-left:4px solid #8A7A5A">
+      <div class="bs-card" style="border-left:4px solid #8A7A5A;background:#F8F3EA">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#8A7A5A">📝 รายการสินค้า</span>
         </div>
@@ -473,7 +488,7 @@
       </div>
 
       <!-- บิลเคลียแล้ว (ล่างสุด) — สีเทาเขียว -->
-      <div class="bs-card" id="bsArchivedCard" style="display:none;border-left:4px solid #7A8A7A;opacity:.85">
+      <div class="bs-card" id="bsArchivedCard" style="display:none;border-left:4px solid #7A8A7A;background:#EFF4EF;opacity:.85">
         <div class="bs-card-header">
           <span class="bs-card-title" style="color:#5A7A5A">✓ เคลียแล้ว</span>
           <span style="font-size:12px;color:var(--gray)">บิลที่ชำระครบแล้ว</span>
@@ -487,6 +502,15 @@
 </div><!-- end .content -->
 
 <div id="bsToast"></div>
+
+<!-- Person detail bottom sheet -->
+<div class="bs-detail-overlay" id="bsDetailOverlay" onclick="bsClosePersonDetail(event)">
+  <div class="bs-detail-sheet">
+    <div class="bs-detail-handle"></div>
+    <div class="bs-detail-title" id="bsDetailTitle">รายละเอียด</div>
+    <div class="bs-detail-body" id="bsDetailBody"></div>
+  </div>
+</div>
 
 <!-- FAB -->
 <div class="fab">
@@ -508,11 +532,11 @@
   <button class="nav-btn" data-tab="chart" onclick="switchTab('chart')">
     <span class="nav-icon">📊</span>กราฟ
   </button>
-  <button class="nav-btn" onclick="openSettings()">
-    <span class="nav-icon">⚙️</span>ตั้งค่า
-  </button>
   <button class="nav-btn" data-tab="billshare" onclick="switchTab('billshare')">
     <span class="nav-icon">🧾</span>หารบิล
+  </button>
+  <button class="nav-btn" onclick="openSettings()">
+    <span class="nav-icon">⚙️</span>ตั้งค่า
   </button>
 </div>
 
@@ -534,14 +558,31 @@
       <label>จำนวนเงิน (บาท)</label>
       <input type="number" id="txAmount" placeholder="0.00" min="0" step="0.01" oninput="updateShareAmountHint()">
     </div>
+    <!-- จ่ายแทน (Pay for someone) -->
+    <div class="form-group" id="payForGroup" style="display:none">
+      <label>จ่ายแทน <span style="color:#B89A72;font-weight:400">(ไม่บังคับ — จ่ายให้คนอื่นทั้งหมด)</span></label>
+      <div id="payForPillsContainer" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+    </div>
+    <!-- แชร์กับ -->
     <div class="form-group" id="shareWithGroup">
       <label>แชร์กับ <span style="color:#B89A72;font-weight:400">(ไม่บังคับ)</span></label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
-        <div class="tx-share-pill" data-key="mom" onclick="toggleShareWith(this)">แม่</div>
-        <div class="tx-share-pill" data-key="partner" onclick="toggleShareWith(this)">บิว</div>
-        <div class="tx-share-pill" data-key="nong" onclick="toggleShareWith(this)">น้อง</div>
+      <div id="shareWithPillsContainer" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      <!-- โหมดหาร -->
+      <div id="shareModeToggle" style="display:none;margin-top:8px;gap:6px">
+        <button id="btnShareEqual" onclick="setShareMode('equal')"
+          style="flex:1;border:1.5px solid #A07828;border-radius:8px;padding:4px 0;font-size:12px;cursor:pointer;font-weight:600;background:#A07828;color:#fff">หารเท่ากัน</button>
+        <button id="btnShareCustom" onclick="setShareMode('custom')"
+          style="flex:1;border:1.5px solid #A07828;border-radius:8px;padding:4px 0;font-size:12px;cursor:pointer;font-weight:600;background:transparent;color:#A07828">ระบุจำนวนเอง</button>
       </div>
+      <!-- custom amount inputs -->
+      <div id="customShareInputs" style="display:none;margin-top:8px"></div>
       <div id="shareAmountHint" style="font-size:12px;color:var(--green);margin-top:6px;min-height:16px;font-weight:600"></div>
+    </div>
+    <!-- shared add-person input (used by both จ่ายแทน and แชร์กับ) -->
+    <div id="addPersonBox" style="display:none;margin-top:-4px;margin-bottom:8px;align-items:center;gap:6px">
+      <input type="text" id="newPersonName" placeholder="ชื่อ..." style="flex:1;border:1.5px solid #C4A882;border-radius:8px;padding:4px 10px;font-size:13px;background:var(--card);color:var(--text)">
+      <button onclick="confirmAddPerson()" style="background:var(--primary);color:#F5E6C8;border:none;border-radius:8px;padding:4px 12px;font-size:13px;cursor:pointer;white-space:nowrap">เพิ่ม</button>
+      <button onclick="cancelAddPerson()" style="background:var(--gray);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer">✕</button>
     </div>
     <div class="form-group">
       <label>หมวดหมู่ <span style="color:#B89A72;font-weight:400">(ไม่บังคับ)</span></label>
@@ -638,7 +679,7 @@
     <div class="modal-title">⚙️ ตั้งค่า</div>
     <div id="settingsMonthLabel" style="text-align:center;font-size:13px;color:#7A6B5A;margin-bottom:4px"></div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:14px" onclick="exportCSV()">
+      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:14px" onclick="openCSVExportModal()">
         📤 ส่งออกไฟล์ CSV
       </button>
       <button class="btn" style="width:100%;font-size:15px;padding:14px;background:#5C3017;color:#F5E6C8" onclick="document.getElementById('importCSVInput').click()">
@@ -656,6 +697,51 @@
     <div style="margin-top:12px">
       <button class="btn btn-secondary" style="width:100%" onclick="closeModal('settingsModal')">ปิด</button>
     </div>
+  </div>
+</div>
+
+<!-- CSV EXPORT PICKER MODAL -->
+<div class="modal-overlay" id="csvExportModal">
+  <div class="modal" style="padding-bottom:24px">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+      <span style="font-size:17px;font-weight:700;color:#3E2A1A">ส่งออกไปยังไฟล์ CSV</span>
+      <span style="font-size:22px">📊</span>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:#3E2A1A;margin-bottom:8px">กรุณาเลือกปี และเดือน:</div>
+
+    <!-- Selected label -->
+    <div id="csvPickerLabel" style="background:#fff;border:1.5px solid #D4B896;border-radius:12px;padding:12px 16px;font-size:16px;font-weight:600;color:#C0446A;text-align:center;margin-bottom:16px;cursor:pointer" onclick="toggleCSVPicker()">
+      มิถุนายน 2026 ▾
+    </div>
+
+    <!-- Drum picker -->
+    <div id="csvPickerWrap" style="display:none;background:#F8F2EA;border-radius:16px;overflow:hidden;margin-bottom:16px;position:relative">
+      <!-- Selection highlight bar -->
+      <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:44px;background:rgba(192,68,106,0.10);pointer-events:none;z-index:2;border-top:1.5px solid #C0446A;border-bottom:1.5px solid #C0446A"></div>
+      <div style="display:flex;height:220px">
+        <!-- Year column -->
+        <div id="csvYearPicker" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none" onscroll="onCSVPickerScroll()">
+          <div style="height:88px"></div><!-- padding top -->
+          <!-- years injected by JS -->
+          <div style="height:88px"></div><!-- padding bottom -->
+        </div>
+        <!-- Month column -->
+        <div id="csvMonthPicker" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-left:1px solid #D4B896" onscroll="onCSVPickerScroll()">
+          <div style="height:88px"></div>
+          <!-- months injected by JS -->
+          <div style="height:88px"></div>
+        </div>
+      </div>
+      <style>#csvYearPicker::-webkit-scrollbar,#csvMonthPicker::-webkit-scrollbar{display:none}</style>
+    </div>
+
+    <div style="font-size:12px;color:#8A7A6A;margin-bottom:16px;line-height:1.5">
+      หมายเหตุ: แนะนำเปิดอ่านไฟล์ CSV บนแอป Numbers หรือ Excel
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;font-size:16px;padding:14px" onclick="doExportCSV()">ส่งออก</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:8px" onclick="closeModal('csvExportModal')">ยกเลิก</button>
   </div>
 </div>
 
@@ -823,59 +909,272 @@ function getPersonShare(t, personKey) {
   return t.amount / (t.shareWith.length + 1);
 }
 
-// ========== SHARE WITH ==========
-const SHARE_PEOPLE = { mom:"แม่", partner:"บิว", nong:"น้อง" };
+// ========== PEOPLE / CUSTOM NAMES ==========
+const FIXED_PEOPLE = { mom:"แม่", partner:"บิว", nong:"น้อง" };
+let customPeople = JSON.parse(localStorage.getItem('customPeople') || '[]');
 
-function toggleShareWith(el) {
-  el.classList.toggle('sel');
-  updateShareAmountHint();
+function saveCustomPeople() { localStorage.setItem('customPeople', JSON.stringify(customPeople)); }
+
+function getPersonName(key) {
+  if (FIXED_PEOPLE[key]) return FIXED_PEOPLE[key];
+  const cp = customPeople.find(p => p.key === key);
+  return cp ? cp.name : key;
 }
+
+function addCustomPerson(name) {
+  name = name.trim();
+  if (!name) return null;
+  // avoid duplicate names
+  if (Object.values(FIXED_PEOPLE).includes(name)) return null;
+  if (customPeople.find(p => p.name === name)) return null;
+  const key = 'cp_' + Date.now();
+  customPeople.push({ key, name });
+  saveCustomPeople();
+  return key;
+}
+
+// Build a share pill element
+function makePill(key, name, clickFn, extraClass='') {
+  const el = document.createElement('div');
+  el.className = 'tx-share-pill' + (extraClass ? ' ' + extraClass : '');
+  el.dataset.key = key;
+  el.textContent = name;
+  el.onclick = () => clickFn(el);
+  return el;
+}
+
+// Render pills for shareWith container (multi-select)
+function renderSharePills(selectedKeys) {
+  const container = document.getElementById('shareWithPillsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  const allFixed = [['mom','แม่'],['partner','บิว'],['nong','น้อง']];
+  allFixed.forEach(([k,n]) => {
+    const el = makePill(k, n, (el) => { el.classList.toggle('sel'); updateShareAmountHint(); });
+    if ((selectedKeys||[]).includes(k)) el.classList.add('sel');
+    container.appendChild(el);
+  });
+  customPeople.forEach(p => {
+    const el = makePill(p.key, p.name, (el) => { el.classList.toggle('sel'); updateShareAmountHint(); });
+    if ((selectedKeys||[]).includes(p.key)) el.classList.add('sel');
+    container.appendChild(el);
+  });
+  // ➕ add person button
+  const addBtn = document.createElement('div');
+  addBtn.className = 'tx-share-pill';
+  addBtn.style.cssText = 'border-style:dashed;color:#A07828;background:transparent;font-weight:700';
+  addBtn.textContent = '➕ เพิ่ม';
+  addBtn.onclick = () => showAddPersonInput();
+  container.appendChild(addBtn);
+}
+
+// Render pills for payFor container (single-select)
+function renderPayForPills(selectedKey) {
+  const container = document.getElementById('payForPillsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  const allFixed = [['mom','แม่'],['partner','บิว'],['nong','น้อง']];
+  allFixed.forEach(([k,n]) => {
+    const el = makePill(k, n, (el) => togglePayForPill(el));
+    if (selectedKey === k) el.classList.add('sel');
+    container.appendChild(el);
+  });
+  customPeople.forEach(p => {
+    const el = makePill(p.key, p.name, (el) => togglePayForPill(el));
+    if (selectedKey === p.key) el.classList.add('sel');
+    container.appendChild(el);
+  });
+  // ➕ add person button
+  const addBtn = document.createElement('div');
+  addBtn.className = 'tx-share-pill';
+  addBtn.style.cssText = 'border-style:dashed;color:#A07828;background:transparent;font-weight:700';
+  addBtn.textContent = '➕ เพิ่ม';
+  addBtn.onclick = () => showAddPersonInput();
+  container.appendChild(addBtn);
+}
+
+function togglePayForPill(el) {
+  const wasSelected = el.classList.contains('sel');
+  document.querySelectorAll('#payForPillsContainer .tx-share-pill').forEach(p => p.classList.remove('sel'));
+  if (!wasSelected) el.classList.add('sel');
+  // if payFor is set, clear shareWith (mutually exclusive)
+  if (el.classList.contains('sel')) resetSharePills();
+}
+
+function getPayFor() {
+  const sel = document.querySelector('#payForPillsContainer .tx-share-pill.sel');
+  return sel ? sel.dataset.key : null;
+}
+
+function resetPayForPills() {
+  document.querySelectorAll('#payForPillsContainer .tx-share-pill').forEach(el => el.classList.remove('sel'));
+}
+
+// Add person input UI
+function showAddPersonInput() {
+  const box = document.getElementById('addPersonBox');
+  box.style.display = 'flex';
+  document.getElementById('newPersonName').value = '';
+  document.getElementById('newPersonName').focus();
+}
+function cancelAddPerson() {
+  document.getElementById('addPersonBox').style.display = 'none';
+}
+function confirmAddPerson() {
+  const name = document.getElementById('newPersonName').value.trim();
+  if (!name) return;
+  const key = addCustomPerson(name);
+  document.getElementById('addPersonBox').style.display = 'none';
+  // Re-render pills keeping current selections
+  const currentSelected = getShareWith();
+  renderSharePills(currentSelected);
+  renderPayForPills(getPayFor());
+}
+
+// ========== SHARE WITH ==========
 function getShareWith() {
-  return Array.from(document.querySelectorAll('#shareWithGroup .tx-share-pill.sel')).map(el => el.dataset.key);
+  return Array.from(document.querySelectorAll('#shareWithPillsContainer .tx-share-pill.sel')).map(el => el.dataset.key);
 }
 function resetSharePills() {
-  document.querySelectorAll('#shareWithGroup .tx-share-pill').forEach(el => el.classList.remove('sel'));
-  document.getElementById('shareAmountHint').textContent = '';
+  document.querySelectorAll('#shareWithPillsContainer .tx-share-pill').forEach(el => el.classList.remove('sel'));
+  const hint = document.getElementById('shareAmountHint');
+  if (hint) hint.textContent = '';
 }
 function setShareWith(keys) {
-  document.querySelectorAll('#shareWithGroup .tx-share-pill').forEach(el => {
+  document.querySelectorAll('#shareWithPillsContainer .tx-share-pill').forEach(el => {
     el.classList.toggle('sel', (keys||[]).includes(el.dataset.key));
   });
   updateShareAmountHint();
 }
+let shareMode = 'equal'; // 'equal' | 'custom'
+
+function setShareMode(mode) {
+  shareMode = mode;
+  const eBtn = document.getElementById('btnShareEqual');
+  const cBtn = document.getElementById('btnShareCustom');
+  if (eBtn) { eBtn.style.background = mode==='equal' ? '#A07828' : 'transparent'; eBtn.style.color = mode==='equal' ? '#fff' : '#A07828'; }
+  if (cBtn) { cBtn.style.background = mode==='custom' ? '#A07828' : 'transparent'; cBtn.style.color = mode==='custom' ? '#fff' : '#A07828'; }
+  updateShareAmountHint();
+}
+
 function updateShareAmountHint() {
   const amount = parseFloat(document.getElementById('txAmount').value) || 0;
   const selected = getShareWith();
   const hint = document.getElementById('shareAmountHint');
-  if (!hint) return;
-  if (selected.length === 0 || amount === 0) { hint.textContent = ''; return; }
-  const total = selected.length + 1; // +1 for เรา
-  const per = amount / total;
-  const names = [...selected.map(k => SHARE_PEOPLE[k]), 'เรา'].join(', ');
-  hint.textContent = `แต่ละคนจ่าย ${fmt(per)} บาท (${names})`;
+  const modeToggle = document.getElementById('shareModeToggle');
+  const customInputs = document.getElementById('customShareInputs');
+
+  // Hide mode toggle if no one selected
+  if (modeToggle) modeToggle.style.display = selected.length > 0 ? 'flex' : 'none';
+
+  if (selected.length === 0) {
+    if (hint) hint.textContent = '';
+    if (customInputs) customInputs.style.display = 'none';
+    return;
+  }
+
+  if (shareMode === 'custom') {
+    if (hint) hint.textContent = '';
+    if (customInputs) {
+      customInputs.style.display = 'block';
+      // Preserve existing values when re-rendering
+      const existing = {};
+      selected.forEach(k => {
+        const el = document.getElementById('customShare_' + k);
+        if (el) existing[k] = el.value;
+      });
+      customInputs.innerHTML = selected.map(k => `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="min-width:48px;font-weight:600;color:var(--text);font-size:13px">${getPersonName(k)}</span>
+          <input type="number" id="customShare_${k}" placeholder="0.00" min="0" step="0.01" value="${existing[k]||''}"
+            style="flex:1;border:1.5px solid #C4A882;border-radius:8px;padding:4px 10px;font-size:13px;background:var(--card);color:var(--text)"
+            oninput="updateCustomShareHint()">
+          <span style="font-size:12px;color:var(--gray);white-space:nowrap">บาท</span>
+        </div>`).join('') +
+        `<div id="customShareMyHint" style="font-size:12px;font-weight:700;margin-top:4px;color:var(--green)"></div>`;
+      updateCustomShareHint();
+    }
+  } else {
+    // equal mode
+    if (customInputs) customInputs.style.display = 'none';
+    if (amount === 0) { if (hint) hint.textContent = ''; return; }
+    const per = amount / (selected.length + 1);
+    const names = [...selected.map(k => getPersonName(k)), 'เรา'].join(', ');
+    if (hint) hint.textContent = `แต่ละคนจ่าย ${fmt(per)} บาท (${names})`;
+  }
+}
+
+function updateCustomShareHint() {
+  const amount = parseFloat(document.getElementById('txAmount').value) || 0;
+  const selected = getShareWith();
+  let othersTotal = 0;
+  selected.forEach(k => { othersTotal += parseFloat(document.getElementById('customShare_' + k)?.value) || 0; });
+  const myShare = Math.max(0, amount - othersTotal);
+  const el = document.getElementById('customShareMyHint');
+  if (!el) return;
+  if (othersTotal > amount + 0.005) {
+    el.style.color = '#9A4020';
+    el.textContent = `⚠️ ยอดของคนอื่นเกินยอดรวม`;
+  } else {
+    el.style.color = 'var(--green)';
+    el.textContent = `เราจ่าย: ฿${fmt(myShare)}`;
+  }
+}
+
+function getCustomShares() {
+  if (shareMode !== 'custom') return null;
+  const selected = getShareWith();
+  const result = {};
+  selected.forEach(k => {
+    const val = parseFloat(document.getElementById('customShare_' + k)?.value);
+    if (!isNaN(val) && val >= 0) result[k] = Math.round(val * 100) / 100;
+  });
+  return Object.keys(result).length ? result : null;
 }
 
 function renderShareSummary() {
   const m = currentDate.getMonth(), y = currentDate.getFullYear();
+  const section = document.getElementById('shareSummarySection');
+  const container = document.getElementById('shareSummary');
+  if (!section || !container) return;
+
+  // --- แชร์กับ (shared expenses) ---
   const sharedTx = transactions.filter(t => {
     const d = new Date(t.date);
     return d.getMonth()===m && d.getFullYear()===y && t.type==='expense' && Array.isArray(t.shareWith) && t.shareWith.length > 0;
   });
-  const section = document.getElementById('shareSummarySection');
-  const container = document.getElementById('shareSummary');
-  if (!section || !container) return;
-  if (!sharedTx.length) { section.style.display='none'; return; }
-  section.style.display = '';
-  const summary = {};
+  const shareSummary = {};
   sharedTx.forEach(t => {
     t.shareWith.forEach(person => {
       const per = getPersonShare(t, person);
-      if (!summary[person]) summary[person] = { items:[], total:0 };
-      summary[person].items.push({ txId:t.id, name:t.name, amount:per, date:t.date });
-      summary[person].total += per;
+      if (!shareSummary[person]) shareSummary[person] = { items:[], total:0 };
+      shareSummary[person].items.push({ txId:t.id, name:t.name, amount:per, date:t.date, type:'share' });
+      shareSummary[person].total += per;
     });
   });
-  container.innerHTML = Object.entries(summary).map(([key, data]) => {
+
+  // --- จ่ายแทน (payFor expenses) ---
+  const payForTx = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth()===m && d.getFullYear()===y && t.type==='expense' && t.payFor;
+  });
+  const payForSummary = {};
+  payForTx.forEach(t => {
+    const person = t.payFor;
+    if (!payForSummary[person]) payForSummary[person] = { items:[], total:0 };
+    payForSummary[person].items.push({ txId:t.id, name:t.name, amount:t.amount, date:t.date, type:'payfor' });
+    payForSummary[person].total += t.amount;
+  });
+
+  const hasShare = Object.keys(shareSummary).length > 0;
+  const hasPayFor = Object.keys(payForSummary).length > 0;
+  if (!hasShare && !hasPayFor) { section.style.display='none'; return; }
+  section.style.display = '';
+
+  let html = '';
+
+  // แชร์กับ cards
+  html += Object.entries(shareSummary).map(([key, data]) => {
     const rows = data.items.map(item => `
       <div class="share-item-row">
         <span class="share-item-name">
@@ -892,26 +1191,69 @@ function renderShareSummary() {
       </div>`).join('');
     return `<div class="share-person-card">
       <div class="share-person-header">
-        <span class="share-person-name">🧍 ${SHARE_PEOPLE[key]} ติดเรา</span>
+        <span class="share-person-name">🤝 ${getPersonName(key)} ติดเรา (แชร์)</span>
         <span class="share-person-total">ค้าง ฿${fmt(data.total)}</span>
       </div>
       ${rows}
     </div>`;
   }).join('');
+
+  // จ่ายแทน cards
+  html += Object.entries(payForSummary).map(([key, data]) => {
+    const rows = data.items.map(item => `
+      <div class="share-item-row">
+        <span class="share-item-name">
+          ${item.name}
+          <span style="font-size:10px;color:var(--gray)">${dateLabel(item.date)}</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span class="share-item-amount">฿${fmt(item.amount)}</span>
+          <button onclick="event.stopPropagation();openPayForPaidModal('${item.txId}')"
+            style="background:#8A5A20;color:#F5E6C8;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">
+            คืนแล้ว
+          </button>
+        </span>
+      </div>`).join('');
+    return `<div class="share-person-card" style="border-left:3px solid #A07828">
+      <div class="share-person-header">
+        <span class="share-person-name">🧾 ${getPersonName(key)} ยังไม่คืน (จ่ายแทน)</span>
+        <span class="share-person-total" style="color:#A07828">ค้าง ฿${fmt(data.total)}</span>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  container.innerHTML = html;
 }
 
 function markSharePaid(txId, personKey) {
   const t = transactions.find(x => String(x.id) === String(txId));
   if (!t || !t.shareWith || !t.shareWith.includes(personKey)) return;
   const personShare = getPersonShare(t, personKey);
-  // Reduce the expense by their share (they paid us back)
   t.amount = Math.round((t.amount - personShare) * 100) / 100;
-  // Remove them from shareWith — they're settled
   t.shareWith = t.shareWith.filter(k => k !== personKey);
-  // Clean up custom/paid tracking
   if (t.customShares) delete t.customShares[personKey];
   if (t.sharePaid) delete t.sharePaid[personKey];
   save(); refresh();
+}
+
+// payFor paid back → remove the payFor flag (it becomes a normal expense)
+let pendingPayForPaid = null;
+function openPayForPaidModal(txId) {
+  const t = transactions.find(x => String(x.id) === String(txId));
+  if (!t || !t.payFor) return;
+  pendingPayForPaid = txId;
+  const personName = getPersonName(t.payFor);
+  document.getElementById('sharePayConfirmText').textContent = `${personName} คืนเงิน ฿${fmt(t.amount)} สำหรับ "${t.name}" ใช่ไหม?`;
+  document.getElementById('sharePayAmountText').textContent = `รายการจะถูกบันทึกเป็นรายจ่ายปกติ (ไม่มีจ่ายแทน)`;
+  document.getElementById('sharePayModal').classList.add('show');
+  // Override confirm handler for this case
+  document.getElementById('sharePayModal').dataset.mode = 'payfor';
+}
+function confirmPayForPaid() {
+  const t = transactions.find(x => String(x.id) === String(pendingPayForPaid));
+  if (t) { delete t.payFor; save(); refresh(); }
+  pendingPayForPaid = null;
 }
 
 // ========== SUMMARY ==========
@@ -1030,7 +1372,7 @@ function renderTxList(containerId, txs) {
       <div class="tx-icon" style="background:${t.type==='income'?'#C8E6D0':'#E8C8C0'};font-size:22px">${t.type==='income'?'💰':'💸'}</div>
       <div class="tx-info">
         <div class="tx-name">${t.name}</div>
-        <div class="tx-meta">${dateLabel(t.date)}${t.category ? ` · <span style="color:#A0782A;font-weight:600">${t.category}</span>` : ''}${(t.shareWith&&t.shareWith.length) ? ` · <span style="color:#4A5A30;font-weight:600">🤝 ${t.shareWith.map(k=>({mom:'แม่',partner:'บิว',nong:'น้อง'})[k]).join('/')}</span>` : ''}</div>
+        <div class="tx-meta">${dateLabel(t.date)}${t.category ? ` · <span style="color:#A0782A;font-weight:600">${t.category}</span>` : ''}${(t.shareWith&&t.shareWith.length) ? ` · <span style="color:#4A5A30;font-weight:600">🤝 ${t.shareWith.map(k=>getPersonName(k)).join('/')}</span>` : ''}${t.payFor ? ` · <span style="color:#A07828;font-weight:600">🧾 จ่ายแทน ${getPersonName(t.payFor)}</span>` : ''}</div>
       </div>
       <div>
         <div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
@@ -1109,6 +1451,8 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-btn[data-tab]').forEach(el => {
     el.classList.toggle('active', el.dataset.tab === tab);
   });
+  // ซ่อน summary cards เมื่ออยู่ใน tab หารบิล
+  document.querySelector('.summary-cards').style.display = tab === 'billshare' ? 'none' : '';
   if (tab==='list') renderList();
   if (tab==='chart') renderChart();
   if (tab==='billshare') bsRender();
@@ -1127,11 +1471,15 @@ function openAddModal() {
   document.getElementById('txAmount').value = '';
   document.getElementById('txDate').value = getSelectedDateStr();
   resetCatChips('');
-  resetSharePills();
   document.getElementById('txNote').value = '';
   document.getElementById('btnExpense').classList.add('active');
   document.getElementById('btnIncome').classList.remove('active');
   document.getElementById('shareWithGroup').style.display = '';
+  document.getElementById('payForGroup').style.display = '';
+  shareMode = 'equal';
+  renderSharePills([]);
+  renderPayForPills(null);
+  cancelAddPerson();
   updateCatChips('expense', 'catChips');
   document.getElementById('btnRow').innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('addModal')">ยกเลิก</button>
@@ -1159,8 +1507,23 @@ function editTransaction(id) {
   }
   updateCatChips(t.type, 'catChips');
   resetCatChips(t.category || '');
-  document.getElementById('shareWithGroup').style.display = t.type==='expense' ? '' : 'none';
-  setShareWith(t.shareWith || []);
+  const isExpense = t.type === 'expense';
+  document.getElementById('shareWithGroup').style.display = isExpense ? '' : 'none';
+  document.getElementById('payForGroup').style.display = isExpense ? '' : 'none';
+  // Restore share mode
+  shareMode = (t.customShares && Object.keys(t.customShares).length) ? 'custom' : 'equal';
+  setShareMode(shareMode); // update button styles
+  renderSharePills(t.shareWith || []);
+  renderPayForPills(t.payFor || null);
+  // If custom mode, fill in saved values after rendering
+  if (shareMode === 'custom' && t.customShares) {
+    Object.entries(t.customShares).forEach(([k, v]) => {
+      const el = document.getElementById('customShare_' + k);
+      if (el) el.value = v;
+    });
+    updateCustomShareHint();
+  }
+  cancelAddPerson();
   document.getElementById('btnRow').innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('addModal')">ยกเลิก</button>
     <button class="btn btn-primary" onclick="saveTransaction()">บันทึก</button>`;
@@ -1232,7 +1595,8 @@ function setType(t) {
   document.getElementById('btnIncome').classList.toggle('active', t==='income');
   updateCatChips(t, 'catChips');
   document.getElementById('shareWithGroup').style.display = t==='expense' ? '' : 'none';
-  if (t==='income') resetSharePills();
+  document.getElementById('payForGroup').style.display = t==='expense' ? '' : 'none';
+  if (t==='income') { resetSharePills(); resetPayForPills(); cancelAddPerson(); shareMode='equal'; }
 }
 
 function saveTransaction() {
@@ -1246,12 +1610,20 @@ function saveTransaction() {
     category = customInput.value.trim();
   }
   const shareWith = (txType === 'expense') ? getShareWith() : [];
+  const customShares = (txType === 'expense') ? getCustomShares() : null;
+  const payFor = (txType === 'expense') ? getPayFor() : null;
   if (!name || isNaN(amount) || amount<=0) { alert('กรุณากรอกรายการและจำนวนเงิน'); return; }
   if (editingId) {
     const idx = transactions.findIndex(t => String(t.id) === String(editingId));
-    transactions[idx] = { ...transactions[idx], type:txType, name, amount, date, category, note:'', shareWith };
+    const updated = { ...transactions[idx], type:txType, name, amount, date, category, note:'', shareWith };
+    if (customShares) updated.customShares = customShares; else delete updated.customShares;
+    if (payFor) updated.payFor = payFor; else delete updated.payFor;
+    transactions[idx] = updated;
   } else {
-    transactions.push({ id: genId(), type:txType, name, amount, date, category, note:'', shareWith });
+    const tx = { id: genId(), type:txType, name, amount, date, category, note:'', shareWith };
+    if (customShares) tx.customShares = customShares;
+    if (payFor) tx.payFor = payFor;
+    transactions.push(tx);
   }
   save(); closeModal('addModal'); refresh();
 }
@@ -1263,7 +1635,7 @@ function openSharePayModal(txId, personKey) {
   const t = transactions.find(x => String(x.id) === String(txId));
   if (!t) return;
   if (t.sharePaid && t.sharePaid[personKey]) return;
-  const personName = SHARE_PEOPLE[personKey] || personKey;
+  const personName = getPersonName(personKey);
   const amount = getPersonShare(t, personKey);
   pendingSharePay = { txId, personKey };
   const newAmount = Math.round((t.amount - amount) * 100) / 100;
@@ -1273,8 +1645,12 @@ function openSharePayModal(txId, personKey) {
 }
 
 function confirmSharePaid() {
+  const mode = document.getElementById('sharePayModal').dataset.mode;
   closeModal('sharePayModal');
-  if (pendingSharePay.txId && pendingSharePay.personKey) {
+  document.getElementById('sharePayModal').dataset.mode = '';
+  if (mode === 'payfor') {
+    confirmPayForPaid();
+  } else if (pendingSharePay.txId && pendingSharePay.personKey) {
     markSharePaid(pendingSharePay.txId, pendingSharePay.personKey);
     pendingSharePay = { txId: null, personKey: null };
   }
@@ -1288,7 +1664,7 @@ function buildTxItemButtons(t) {
     t.shareWith.forEach(k => {
       payBtns += `<button onclick="event.stopPropagation();openSharePayModal('${t.id}','${k}')"
         style="background:#D4E8D0;border:none;border-radius:6px;padding:3px 8px;font-size:11px;color:#3A5A20;cursor:pointer;font-weight:700;white-space:nowrap">
-        💚 ${SHARE_PEOPLE[k]||k} จ่ายแล้ว</button>`;
+        💚 ${getPersonName(k)} จ่ายแล้ว</button>`;
     });
   }
   return `<div style="text-align:right;margin-top:4px;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
@@ -1464,28 +1840,63 @@ function openSettings() {
   document.getElementById('settingsModal').classList.add('show');
 }
 
-function exportCSV() {
+function exportCSV(year, monthIdx) {
+  // monthIdx: -1 = whole year, 0-11 = month
   const months_th = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  const y = currentDate.getFullYear(), m = currentDate.getMonth();
-  const monthly = transactions.filter(t => {
-    const d = new Date(t.date); return d.getMonth()===m && d.getFullYear()===y;
-  }).sort((a,b)=>a.date.localeCompare(b.date));
-  let csv = `สรุปรายรับ-รายจ่าย เดือน ${months_th[m]} ${y}\n`;
-  csv += 'วันที่, รายการ,       รายรับ       ,       รายจ่าย       , หมวดหมู่หลัก\n';
-  monthly.forEach(t => {
-    const d = t.date.split('-');
-    const dateStr = `${d[2]}/${d[1]}/${d[0]}`;
-    const inc = t.type==='income' ? t.amount.toFixed(2) : '';
-    const exp = t.type==='expense' ? t.amount.toFixed(2) : '';
-    csv += `${dateStr},${t.name},${inc},${exp},${t.category||''}\n`;
-  });
-  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const mn = String(m+1).padStart(2,'0');
-  a.href = url; a.download = `SaveMoney-${y}-${mn}.csv`; a.click();
-  URL.revokeObjectURL(url);
-  closeModal('settingsModal');
+  const y = year ?? currentDate.getFullYear();
+  const m = monthIdx ?? currentDate.getMonth();
+
+  if (m === -1) {
+    // Whole year export
+    const yearly = transactions.filter(t => new Date(t.date).getFullYear() === y)
+      .sort((a,b) => a.date.localeCompare(b.date));
+    let csv = `สรุปรายรับ-รายจ่าย ทั้งปี ${y}\n`;
+    csv += 'วันที่,เดือน,รายการ,รายรับ,รายจ่าย,หมวดหมู่หลัก\n';
+    yearly.forEach(t => {
+      const dObj = new Date(t.date);
+      const d = t.date.split('-');
+      const dateStr = `${d[2]}/${d[1]}/${d[0]}`;
+      const monthName = months_th[dObj.getMonth()];
+      const inc = t.type==='income' ? t.amount.toFixed(2) : '';
+      const exp = t.type==='expense' ? t.amount.toFixed(2) : '';
+      csv += `${dateStr},${monthName},${t.name},${inc},${exp},${t.category||''}\n`;
+    });
+    csv += '\n--- สรุปรายเดือน ---\n';
+    csv += 'เดือน,รายรับรวม,รายจ่ายรวม,คงเหลือ\n';
+    for (let mi = 0; mi < 12; mi++) {
+      const mTx = yearly.filter(t => new Date(t.date).getMonth() === mi);
+      if (!mTx.length) continue;
+      const inc = mTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+      const exp = mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+      csv += `${months_th[mi]},${inc.toFixed(2)},${exp.toFixed(2)},${(inc-exp).toFixed(2)}\n`;
+    }
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `SaveMoney-${y}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  } else {
+    // Single month export
+    const monthly = transactions.filter(t => {
+      const d = new Date(t.date); return d.getMonth()===m && d.getFullYear()===y;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+    let csv = `สรุปรายรับ-รายจ่าย เดือน ${months_th[m]} ${y}\n`;
+    csv += 'วันที่,รายการ,รายรับ,รายจ่าย,หมวดหมู่หลัก\n';
+    monthly.forEach(t => {
+      const d = t.date.split('-');
+      const dateStr = `${d[2]}/${d[1]}/${d[0]}`;
+      const inc = t.type==='income' ? t.amount.toFixed(2) : '';
+      const exp = t.type==='expense' ? t.amount.toFixed(2) : '';
+      csv += `${dateStr},${t.name},${inc},${exp},${t.category||''}\n`;
+    });
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const mn = String(m+1).padStart(2,'0');
+    a.href = url; a.download = `SaveMoney-${y}-${mn}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  closeModal('csvExportModal');
 }
 
 function importCSV(event) {
@@ -1669,6 +2080,10 @@ function bsToday() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
+function bsBillDateSync() {} // no-op (kept for compatibility)
+function bsBillDateSet(ymd) {
+  document.getElementById('bsBillDate').value = ymd || bsToday();
+}
 function bsLoadInitialData() {
   const saved = JSON.parse(localStorage.getItem(BS_KEY)||"null");
   if (Array.isArray(saved) && saved.length > 0) return saved.map(bsNormalizeBill);
@@ -1703,7 +2118,7 @@ function bsAddBill() {
   const bill = { id:Date.now(), name, date, payer, cleared:false, items:[] };
   bsBills.push(bill); bsActiveBillId=bill.id;
   document.getElementById("bsBillName").value="";
-  document.getElementById("bsBillDate").value=bsToday();
+  bsBillDateSet(bsToday());
   bsSaveData(false); bsRender();
 }
 function bsEditBill(id) {
@@ -1962,6 +2377,61 @@ function bsRender() {
   bsRenderItemList();
 }
 
+// ========== PERSON DETAIL BOTTOM SHEET ==========
+function bsShowPersonDetail(personKey) {
+  const name = bsPeople[personKey] || personKey;
+  const activeBills = bsBills.filter(b => !b.cleared);
+  let html = '';
+  let grandTotal = 0;
+
+  activeBills.forEach(bill => {
+    const billItems = bill.items.filter(item => {
+      const owners = Array.isArray(item.owners) && item.owners.length ? item.owners : ['me'];
+      return owners.includes(personKey);
+    });
+    if (!billItems.length) return;
+
+    let billTotal = 0;
+    const rows = billItems.map(item => {
+      const owners = Array.isArray(item.owners) && item.owners.length ? item.owners : ['me'];
+      const price = Number(item.price || 0);
+      const qty = Number(item.qty || 1);
+      const lineTotal = price * qty;
+      const share = lineTotal / owners.length;
+      billTotal += share;
+      const qtyStr = qty > 1 ? ` ×${qty}` : '';
+      const splitStr = owners.length > 1 ? ` (หาร ${owners.length})` : '';
+      return `<div class="bs-detail-row">
+        <span style="color:var(--text)">${item.name}${qtyStr}${splitStr}</span>
+        <span style="font-weight:700;color:#5C3017;white-space:nowrap">฿${bsMoney(share).replace('฿','')}</span>
+      </div>`;
+    }).join('');
+
+    grandTotal += billTotal;
+    html += `<div class="bs-detail-bill">
+      <div class="bs-detail-bill-name">📋 ${bill.name} · ${bsFormatDate(bill.date)}</div>
+      ${rows}
+      <div style="text-align:right;font-size:12px;color:#7A5A3A;font-weight:700;margin-top:4px">รวมบิลนี้ ฿${billTotal.toFixed(2)}</div>
+    </div>`;
+  });
+
+  if (!html) {
+    html = `<div style="text-align:center;color:var(--gray);padding:24px 0">ไม่มีรายการ</div>`;
+  } else {
+    html += `<div class="bs-detail-total"><span>รวมทั้งหมด</span><span style="color:#5C3017">฿${grandTotal.toFixed(2)}</span></div>`;
+  }
+
+  document.getElementById('bsDetailTitle').textContent = `🧍 ${name} — รายการทั้งหมด`;
+  document.getElementById('bsDetailBody').innerHTML = html;
+  document.getElementById('bsDetailOverlay').classList.add('show');
+}
+
+function bsClosePersonDetail(e) {
+  if (e.target === document.getElementById('bsDetailOverlay')) {
+    document.getElementById('bsDetailOverlay').classList.remove('show');
+  }
+}
+
 // Bill Share OCR
 let bsOcrFile=null, bsOcrItems=[];
 const BS_PKEYS=['me','partner','mom','nong'];
@@ -2078,96 +2548,122 @@ function bsRenderOCRCards() {
 }
 function bsOcrToggleOwner(i,key) {
   bsOcrItems[i].owners=[key];
-  BS_PKEYS.forEach(k=>{document.getElementById('bs-op-'+i+'-'+k).className='bs-owner-pill'+(k===key?' sel':'');});
+  BS_PKEYS.forEach(k=>{document.getElementById('bs-op-'+i+'-'+k).className='bs-owner-pill'+(bsOcrItems[i].owners.includes(k)?' active':'')});
   document.getElementById('bs-op-'+i+'-share').className='bs-owner-pill';
   document.getElementById('bs-oshare-'+i).style.display='none';
 }
 function bsOcrToggleShare(i) {
-  bsOcrItems[i].owners=[...BS_PKEYS];
-  BS_PKEYS.forEach(k=>{
-    document.getElementById('bs-op-'+i+'-'+k).className='bs-owner-pill';
-    document.getElementById('bs-sp-'+i+'-'+k).className='bs-share-pill sel';
-  });
-  document.getElementById('bs-op-'+i+'-share').className='bs-owner-pill sel-share';
+  bsOcrItems[i].owners=['share'];
+  BS_PKEYS.forEach(k=>{document.getElementById('bs-op-'+i+'-'+k).className='bs-owner-pill'});
+  document.getElementById('bs-op-'+i+'-share').className='bs-owner-pill active';
   document.getElementById('bs-oshare-'+i).style.display='flex';
 }
 function bsOcrToggleSharePerson(i,key) {
-  const owners=bsOcrItems[i].owners;
-  const idx=owners.indexOf(key);
-  if(idx===-1) owners.push(key); else owners.splice(idx,1);
-  document.getElementById('bs-sp-'+i+'-'+key).className='bs-share-pill'+(owners.includes(key)?' sel':'');
+  const arr=bsOcrItems[i].owners; const idx=arr.indexOf(key);
+  if(idx>=0) arr.splice(idx,1); else arr.push(key);
+  document.getElementById('bs-sp-'+i+'-'+key).className='bs-share-pill'+(arr.includes(key)?' active':'');
 }
-function bsOcrDelCard(i) {
-  const el=document.getElementById('bs-ocard-'+i);
-  if(el) el.remove(); bsOcrItems[i]=null;
-}
-function bsOcrConfirm() {
-  const ab=bsGetActiveBill();
-  if(!ab){alert('กรุณาเลือกบิลก่อน');return;}
-  let added=0;
-  bsOcrItems.forEach((it,i)=>{
-    if(!it) return;
-    const card=document.getElementById('bs-ocard-'+i); if(!card) return;
-    const name=card.querySelector('input[type=text]').value.trim()||'สินค้า';
-    const inputs=card.querySelectorAll('input[type=number]');
-    const price=parseFloat(inputs[0].value)||0;
-    const qty=parseInt(inputs[1].value)||1;
-    const owners=it.owners&&it.owners.length?it.owners:['me'];
-    if(price>0){ab.items.push({id:Date.now()+Math.random(),name,price,qty,owners});added++;}
-  });
-  if(added){
-    bsSaveData(false); bsRender();
-    alert('เพิ่ม '+added+' รายการเข้าบิล "'+ab.name+'" แล้ว');
-    bsOcrReset();
-  } else { alert('ไม่มีรายการที่มีราคา'); }
-}
-
-// Export bill to income-expense transactions
+function bsOcrDelCard(i) { bsOcrItems.splice(i,1); bsRenderOCRCards(); }
 function bsExportToExpenses(billId) {
-  const bill=bsBills.find(b=>b.id===billId);
-  if(!bill) return;
-  if(!bill.items.length){alert('ไม่มีรายการสินค้าในบิลนี้');return;}
-  const already=transactions.find(t=>t.note===`bill-export:${billId}`);
-  if(already&&!confirm('บิลนี้ถูกบันทึกแล้ว ต้องการบันทึกซ้ำหรือไม่?')) return;
-  const personTotals={mom:0,partner:0,me:0,nong:0};
-  let grand=0;
-  bill.items.forEach(item=>{
-    const lt=Number(item.price||0)*Number(item.qty||0);
-    grand+=lt;
-    const owners=Array.isArray(item.owners)&&item.owners.length?item.owners:['me'];
-    const share=lt/owners.length;
-    owners.forEach(o=>{if(personTotals[o]!==undefined) personTotals[o]+=share;});
-  });
-  const shareWith=[];
-  const customShares={};
-  Object.entries(personTotals).forEach(([key,amt])=>{
-    if(key!=='me'&&amt>0.005){shareWith.push(key);customShares[key]=Math.round(amt*100)/100;}
-  });
-  const myAmt=Math.round(personTotals.me*100)/100;
-  const totalAmt=Math.round(grand*100)/100;
-  let msg=`บันทึก "${bill.name}" (${bsFormatDate(bill.date)}) เข้ารายจ่าย\nยอดรวม: ฿${fmt(totalAmt)}\nเราจ่ายจริง: ฿${fmt(myAmt)}`;
-  if(shareWith.length) msg+=`\nค้างชำระ: ${shareWith.map(k=>bsPeople[k]+' ฿'+fmt(customShares[k])).join(', ')}`;
-  if(!confirm(msg)) return;
-  transactions.push({
-    id:genId(),type:'expense',name:bill.name,amount:totalAmt,date:bill.date,
-    category:'🛒 ช้อปปิ้ง',note:`bill-export:${billId}`,shareWith,
-    customShares:Object.keys(customShares).length?customShares:undefined
+  const bill=makroShoppingBills.find(b=>b.id===billId);
+  if(!bill)return;
+  const billDate=bill.date||bsToday();
+  bill.items.forEach(it=>{
+    if(!it.price)return;
+    const owners=it.owners||[];
+    const shareKeys=owners.filter(k=>k!=='share');
+    let shareWith=[],payFor=null;
+    if(owners.includes('share')){
+      shareWith=it.owners.filter(k=>k!=='share');
+    } else if(shareKeys.length===1 && shareKeys[0]!=='me'){
+      payFor=shareKeys[0];
+    } else if(shareKeys.length>1){
+      shareWith=shareKeys.filter(k=>k!=='me');
+    }
+    const tx={id:Date.now()+Math.random(),type:'expense',name:it.name,amount:it.price*(it.qty||1),date:billDate,category:'\u{1F6D2} ของใช้/ของกิน',shareWith,payFor};
+    transactions.push(tx);
   });
   save(); refresh();
-  const t=document.getElementById('bsToast');
-  if(t){t.textContent=`✓ บันทึก "${bill.name}" เข้ารายจ่ายแล้ว`;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+  showToast('บันทึกรายการเข้ารายจ่ายแล้ว ✅');
 }
 
-// Init Bill Share
-document.getElementById("bsBillDate").value=bsToday();
-bsRender();
+// ========== CSV EXPORT PICKER ==========
+const CSV_MONTHS = ['ทั้งปี','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+let csvPickerOpen = false;
 
-// ========== CLICK OUTSIDE ==========
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', function(e) {
-    if (e.target === this) this.classList.remove('show');
+function openCSVExportModal() {
+  closeModal('settingsModal');
+  const y = currentDate.getFullYear(), m = currentDate.getMonth();
+  const yearEl = document.getElementById('csvYearPicker');
+  const monthEl = document.getElementById('csvMonthPicker');
+  const years = [];
+  for (let yi = y - 5; yi <= y + 1; yi++) years.push(yi);
+  yearEl.innerHTML = '';
+  const yTopPad = document.createElement('div'); yTopPad.style.height='88px'; yearEl.appendChild(yTopPad);
+  years.forEach(yr => {
+    const d = document.createElement('div');
+    d.textContent = yr + 543; d.dataset.val = yr;
+    d.style.cssText = 'height:44px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;scroll-snap-align:center;color:#3E2A1A';
+    yearEl.appendChild(d);
   });
-});
+  const yBotPad = document.createElement('div'); yBotPad.style.height='88px'; yearEl.appendChild(yBotPad);
+  monthEl.innerHTML = '';
+  const mTopPad = document.createElement('div'); mTopPad.style.height='88px'; monthEl.appendChild(mTopPad);
+  CSV_MONTHS.forEach((mn, idx) => {
+    const d = document.createElement('div');
+    d.textContent = mn; d.dataset.val = idx - 1;
+    d.style.cssText = 'height:44px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;scroll-snap-align:center;color:#3E2A1A';
+    monthEl.appendChild(d);
+  });
+  const mBotPad = document.createElement('div'); mBotPad.style.height='88px'; monthEl.appendChild(mBotPad);
+  const yIdx = years.indexOf(y);
+  setTimeout(() => {
+    yearEl.scrollTop = yIdx * 44;
+    monthEl.scrollTop = (m + 1) * 44;
+    updateCSVPickerLabel();
+  }, 30);
+  csvPickerOpen = false;
+  document.getElementById('csvPickerWrap').style.display = 'none';
+  document.getElementById('csvExportModal').classList.add('show');
+}
+
+function toggleCSVPicker() {
+  csvPickerOpen = !csvPickerOpen;
+  document.getElementById('csvPickerWrap').style.display = csvPickerOpen ? 'block' : 'none';
+  const arrow = csvPickerOpen ? '▴' : '▾';
+  const lbl = document.getElementById('csvPickerLabel');
+  lbl.textContent = lbl.textContent.replace(/[▴▾]/, arrow);
+}
+
+function getCSVPickerValues() {
+  const yearEl = document.getElementById('csvYearPicker');
+  const monthEl = document.getElementById('csvMonthPicker');
+  const yItems = yearEl.querySelectorAll('[data-val]');
+  const mItems = monthEl.querySelectorAll('[data-val]');
+  const yIdx = Math.round(yearEl.scrollTop / 44);
+  const mIdx = Math.round(monthEl.scrollTop / 44);
+  const selectedYear = yItems[Math.min(yIdx, yItems.length-1)]?.dataset?.val;
+  const selectedMonth = mItems[Math.min(mIdx, mItems.length-1)]?.dataset?.val;
+  return { year: parseInt(selectedYear||currentDate.getFullYear()), month: parseInt(selectedMonth??currentDate.getMonth()) };
+}
+
+function onCSVPickerScroll() {
+  clearTimeout(window._csvPickerScrollT);
+  window._csvPickerScrollT = setTimeout(updateCSVPickerLabel, 120);
+}
+
+function updateCSVPickerLabel() {
+  const {year, month} = getCSVPickerValues();
+  const monthName = month === -1 ? CSV_MONTHS[0] : CSV_MONTHS[month + 1];
+  const lbl = document.getElementById('csvPickerLabel');
+  const arrow = csvPickerOpen ? '▴' : '▾';
+  lbl.textContent = monthName + ' ' + (year + 543) + ' ' + arrow;
+}
+
+function doExportCSV() {
+  const {year, month} = getCSVPickerValues();
+  exportCSV(year, month);
+}
 
 // ========== INIT ==========
 initSampleData();
@@ -2176,4 +2672,3 @@ renderCalendar();
 selectDay(todayStr(), new Date().getDate());
 </script>
 </body>
-</html>
