@@ -2087,7 +2087,9 @@ function importCSV(event) {
       if (!rawDate || !name) continue;
       const parts = rawDate.split('/');
       if (parts.length < 3) continue;
-      const dateStr = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+      let yearNum = parseInt(parts[2]);
+      if (yearNum > 2500) yearNum -= 543; // แปลง พ.ศ. → ค.ศ.
+      const dateStr = `${yearNum}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
       const incAmt = parseFloat(incStr);
       const expAmt = parseFloat(expStr);
       const isIncome = !isNaN(incAmt) && incAmt > 0;
@@ -3084,7 +3086,7 @@ async function fbSave() {
 async function fbLoad() {
   try {
     const snap = await FB_DOC.get();
-    if (!snap.exists) { await fbSave(); return; } // first time: upload local data
+    if (!snap.exists) return;
     const d = snap.data();
     let changed = false;
     if (Array.isArray(d.transactions)) {
