@@ -3084,7 +3084,7 @@ async function fbSave() {
 async function fbLoad() {
   try {
     const snap = await FB_DOC.get();
-    if (!snap.exists) return;
+    if (!snap.exists) { await fbSave(); return; } // first time: upload local data
     const d = snap.data();
     let changed = false;
     if (Array.isArray(d.transactions)) {
