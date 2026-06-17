@@ -885,9 +885,9 @@ function genId() { return Date.now() + '_' + Math.random().toString(36).slice(2,
 function fmt(n) { return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 function toThaiDate(isoStr) {
-  // "2026-06-06" → "06/06/2569"
+  // "2026-06-06" → "06/06/2026"
   const [y, m, d] = isoStr.split('-');
-  return `${d}/${m}/${parseInt(y)+543}`;
+  return `${d}/${m}/${parseInt(y)}`;
 }
 function fromThaiDate(str) {
   // "06/06/2569" → "2026-06-06"
@@ -901,7 +901,7 @@ function fromThaiDate(str) {
 function dateLabel(d) {
   const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const dt = new Date(d);
-  return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()+543}`;
+  return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
 }
 
 function initSampleData() {
@@ -1309,7 +1309,7 @@ function updateSummary() {
 function renderCalendar() {
   const months_th = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   const y = currentDate.getFullYear(), m = currentDate.getMonth();
-  document.getElementById('monthTitle').textContent = `${months_th[m]} ${y+543}`;
+  document.getElementById('monthTitle').textContent = `${months_th[m]} ${y}`;
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
   ['อา','จ','อ','พ','พฤ','ศ','ส'].forEach(d => {
@@ -2004,7 +2004,7 @@ function slipToAddModal() {
 function openSettings() {
   const months_th = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   const y = currentDate.getFullYear(), m = currentDate.getMonth();
-  document.getElementById('settingsMonthLabel').textContent = `เดือน: ${months_th[m]} ${y+543}`;
+  document.getElementById('settingsMonthLabel').textContent = `เดือน: ${months_th[m]} ${y}`;
   document.getElementById('settingsModal').classList.add('show');
 }
 
@@ -2113,7 +2113,7 @@ function importCSV(event) {
 function clearCurrentMonth() {
   const months_th = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   const y = currentDate.getFullYear(), m = currentDate.getMonth();
-  if (!confirm(`ล้างข้อมูลเดือน ${months_th[m]} ${y+543} ทั้งหมด?`)) return;
+  if (!confirm(`ล้างข้อมูลเดือน ${months_th[m]} ${y} ทั้งหมด?`)) return;
   transactions = transactions.filter(t => {
     const d = new Date(t.date); return !(d.getMonth()===m && d.getFullYear()===y);
   });
@@ -2988,7 +2988,7 @@ function openCSVExportModal() {
   const yTopPad = document.createElement('div'); yTopPad.style.height='88px'; yearEl.appendChild(yTopPad);
   txYears.forEach(yr => {
     const d = document.createElement('div');
-    d.textContent = yr + 543; d.dataset.val = yr;
+    d.textContent = yr; d.dataset.val = yr;
     d.style.cssText = 'height:44px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;scroll-snap-align:center;color:#3E2A1A';
     yearEl.appendChild(d);
   });
@@ -3051,7 +3051,7 @@ function onCSVPickerScroll() {
 function updateCSVPickerLabel() {
   const {year, month} = getCSVPickerValues();
   const CSV_MONTHS = ["ทั้งปี","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-  const label = month === 0 ? "ทั้งปี "+(year+543) : CSV_MONTHS[month]+" "+(year+543);
+  const label = month === 0 ? "ทั้งปี "+year : CSV_MONTHS[month]+" "+year;
   const el = document.getElementById("csvPickerLabel");
   if (el) el.textContent = label+" ▲";
 }
