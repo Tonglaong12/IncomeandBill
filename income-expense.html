@@ -3055,7 +3055,7 @@ function updateCSVPickerLabel() {
   const el = document.getElementById("csvPickerLabel");
   if (el) el.textContent = label+" ▲";
 }
-function doExportCSV() { const {year,month}=getCSVPickerValues(); exportCSV(year,month); }
+function doExportCSV() { const {year,month}=getCSVPickerValues(); exportCSV(year, month===0 ? -1 : month-1); }
 
 // ========== FIREBASE ==========
 const firebaseConfig = {
