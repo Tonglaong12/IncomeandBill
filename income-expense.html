@@ -12,6 +12,8 @@
 <title>รายรับ-รายจ่าย</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -878,7 +880,7 @@ let slipType = 'expense';
 
 const COLORS = ['#729598','#DCB084','#A19F89','#903729','#4F5E62','#E9DCCF','#B8755A','#5A7A7C'];
 
-function save() { localStorage.setItem('transactions', JSON.stringify(transactions)); }
+function save() { localStorage.setItem('transactions', JSON.stringify(transactions)); fbSave(); }
 function genId() { return Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
 function fmt(n) { return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function todayStr() { return new Date().toISOString().split('T')[0]; }
@@ -940,7 +942,7 @@ function getEffectiveAmount(t) {
 const FIXED_PEOPLE = { mom:"แม่", partner:"บิว", nong:"น้อง" };
 let customPeople = JSON.parse(localStorage.getItem('customPeople') || '[]');
 
-function saveCustomPeople() { localStorage.setItem('customPeople', JSON.stringify(customPeople)); }
+function saveCustomPeople() { localStorage.setItem('customPeople', JSON.stringify(customPeople)); fbSave(); }
 
 function getPersonName(key) {
   if (FIXED_PEOPLE[key]) return FIXED_PEOPLE[key];
@@ -2120,7 +2122,7 @@ function clearCurrentMonth() {
 let recurringList = JSON.parse(localStorage.getItem('recurring') || '[]');
 let recType = 'expense';
 
-function saveRecurring() { localStorage.setItem('recurring', JSON.stringify(recurringList)); }
+function saveRecurring() { localStorage.setItem('recurring', JSON.stringify(recurringList)); fbSave(); }
 
 function openRecurringModal() {
   recType = 'expense';
@@ -2443,6 +2445,7 @@ function bsClearAll() {
 }
 function bsSaveData(showAlert=true) {
   localStorage.setItem(BS_KEY, JSON.stringify(bsBills));
+  fbSave();
   if (showAlert) {
     const t=document.getElementById('bsToast');
     t.textContent='✓ บันทึกแล้ว'; t.classList.add('show');
@@ -3051,8 +3054,71 @@ function updateCSVPickerLabel() {
   if (el) el.textContent = label+" ▲";
 }
 function doExportCSV() { const {year,month}=getCSVPickerValues(); exportCSV(year,month); }
+
+// ========== FIREBASE ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyCsWUFiXUk-brlRk7oU-keT2eWupPwGO5g",
+  authDomain: "income-and-bill.firebaseapp.com",
+  projectId: "income-and-bill",
+  storageBucket: "income-and-bill.firebasestorage.app",
+  messagingSenderId: "962761018175",
+  appId: "1:962761018175:web:7283c9ad56887a2722618a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const FB_DOC = db.collection('data').doc('main');
+
+async function fbSave() {
+  try {
+    await FB_DOC.set({
+      transactions: transactions,
+      bills: bsBills,
+      customPeople: bsCustomPeople,
+      customPeopleMain: customPeople,
+      recurringList: recurringList,
+      updatedAt: Date.now()
+    });
+  } catch(e) { console.warn('Firebase save error', e); }
+}
+
+async function fbLoad() {
+  try {
+    const snap = await FB_DOC.get();
+    if (!snap.exists) return;
+    const d = snap.data();
+    let changed = false;
+    if (Array.isArray(d.transactions)) {
+      transactions = d.transactions;
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      changed = true;
+    }
+    if (Array.isArray(d.bills)) {
+      bsBills = d.bills;
+      localStorage.setItem(BS_KEY, JSON.stringify(bsBills));
+      changed = true;
+    }
+    if (Array.isArray(d.customPeople)) {
+      bsCustomPeople = d.customPeople;
+      localStorage.setItem('bsCustomPeopleV2', JSON.stringify(bsCustomPeople));
+      bsRefreshPeopleData();
+      changed = true;
+    }
+    if (Array.isArray(d.customPeopleMain)) {
+      customPeople = d.customPeopleMain;
+      localStorage.setItem('customPeople', JSON.stringify(customPeople));
+      changed = true;
+    }
+    if (Array.isArray(d.recurringList)) {
+      recurringList = d.recurringList;
+      localStorage.setItem('recurring', JSON.stringify(recurringList));
+      changed = true;
+    }
+    if (changed) { refresh(); bsRender(); }
+  } catch(e) { console.warn('Firebase load error', e); }
+}
+
 // ========== INIT ==========
-initSampleData(); updateSummary(); renderCalendar(); selectDay(todayStr(), new Date().getDate());
-</script>
-</body>
-</html>
+refresh();
+bsRender();
+fbLoad();
+</script></body></html>
