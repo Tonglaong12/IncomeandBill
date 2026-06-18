@@ -2075,15 +2075,22 @@ function importCSV(event) {
     const text = ev.target.result.replace(/^﻿/,'');
     const lines = text.split('\n').filter(l=>l.trim());
     let added = 0, skipped = 0;
+    // ตรวจว่าเป็น yearly format (มีคอลัมน์ "เดือน") หรือ monthly
+    const headerLine = lines[1] || '';
+    const isYearly = headerLine.includes('เดือน');
     const existingKeys = new Set(transactions.map(t=>`${t.date}|${t.name}|${t.amount}`));
     for (let i=2; i<lines.length; i++) {
-      const cols = lines[i].split(',');
+      const line = lines[i];
+      if (line.startsWith('---') || line.startsWith('เดือน,')) continue; // ข้าม summary section
+      const cols = line.split(',');
       if (cols.length < 4) continue;
       const rawDate = cols[0].trim();
-      const name = cols[1].trim();
-      const incStr = cols[2].trim();
-      const expStr = cols[3].trim();
-      const category = cols[4] ? cols[4].trim() : '';
+      // yearly: col1=เดือน, col2=ชื่อ, col3=รายรับ, col4=รายจ่าย, col5=หมวดหมู่
+      // monthly: col0=วันที่, col1=ชื่อ, col2=รายรับ, col3=รายจ่าย, col4=หมวดหมู่
+      const name = isYearly ? cols[2].trim() : cols[1].trim();
+      const incStr = isYearly ? cols[3].trim() : cols[2].trim();
+      const expStr = isYearly ? cols[4].trim() : cols[3].trim();
+      const category = isYearly ? (cols[5]||'').trim() : (cols[4]||'').trim();
       if (!rawDate || !name) continue;
       const parts = rawDate.split('/');
       if (parts.length < 3) continue;
@@ -3089,7 +3096,8 @@ async function fbLoad() {
     if (!snap.exists) return;
     const d = snap.data();
     let changed = false;
-    if (Array.isArray(d.transactions)) {
+    if (Array.isArray(d.transactions) && d.transactions.length > transactions.length) {
+      // โหลดจาก Firestore เฉพาะตอนที่ Firestore มีข้อมูลมากกว่า local
       transactions = d.transactions;
       localStorage.setItem('transactions', JSON.stringify(transactions));
       changed = true;
