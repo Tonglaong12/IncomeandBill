@@ -830,6 +830,21 @@
           <label style="display:flex;align-items:center;gap:3px;font-size:12px;background:var(--card);padding:4px 8px;border-radius:20px;cursor:pointer;border:1px solid #C4A882"><input type="checkbox" class="rec-month-cb" value="12" style="width:13px;height:13px"> ธ.ค.</label>
         </div>
       </div>
+      <!-- แชร์กับใคร -->
+      <div class="form-group" style="margin-top:4px">
+        <label>แชร์กับ <span style="color:#B89A72;font-weight:400">(ไม่บังคับ)</span></label>
+        <div id="recShareChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+        <div id="recShareModeRow" style="display:none;margin-top:10px">
+          <div class="type-toggle">
+            <button class="type-btn expense active" id="recShareEqBtn" onclick="setRecShareMode('equal')">หารเท่ากัน</button>
+            <button class="type-btn income" id="recShareCuBtn" onclick="setRecShareMode('custom')">ระบุจำนวนเอง</button>
+          </div>
+          <div id="recShareCustomRow" style="display:none;margin-top:8px">
+            <label style="font-size:12px;color:#7A6B5A">จำนวนของเรา (บาท)</label>
+            <input type="number" id="recShareMyAmt" placeholder="0.00" min="0" step="0.01" style="width:100%;padding:10px;border-radius:8px;border:1px solid #C4A882;font-size:15px;margin-top:4px">
+          </div>
+        </div>
+      </div>
       <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="addRecurring()">บันทึก</button>
     </div>
 
@@ -2149,6 +2164,9 @@ function openRecurringModal() {
   document.getElementById('recCategoryCustom').style.display = 'none';
   document.querySelectorAll('#recCatChips .cat-chip').forEach(c=>c.classList.remove('selected'));
   document.querySelectorAll('.rec-month-cb').forEach(cb=>cb.checked=false);
+  recShareSelected = []; recShareMode = 'equal';
+  renderRecShareChips();
+  document.getElementById('recShareModeRow').style.display = 'none';
   renderRecurringList();
   document.getElementById('recurringModal').classList.add('show');
 }
@@ -2175,6 +2193,43 @@ function selectRecCat(el) {
   }
 }
 
+let recShareSelected = [];
+let recShareMode = 'equal';
+
+function renderRecShareChips() {
+  const people = [['mom','แม่'],['partner','บิว'],['nong','น้อง'], ...bsCustomPeople.map(p=>[p.key,p.label])];
+  const c = document.getElementById('recShareChips'); if(!c) return;
+  c.innerHTML = people.map(([k,n]) => {
+    const sel = recShareSelected.includes(k);
+    return `<button type="button" onclick="toggleRecSharePerson('${k}')" style="padding:6px 14px;border-radius:20px;border:1.5px solid ${sel?'#6B3A1F':'#C4A882'};background:${sel?'#6B3A1F':'var(--card)'};color:${sel?'#F5ECD8':'var(--text)'};font-size:13px;cursor:pointer">${n}</button>`;
+  }).join('') + `<button type="button" onclick="addRecSharePerson()" style="padding:6px 14px;border-radius:20px;border:1.5px dashed #C4A882;background:transparent;color:#B89A72;font-size:13px;cursor:pointer">+ เพิ่ม</button>`;
+}
+
+function toggleRecSharePerson(key) {
+  const i = recShareSelected.indexOf(key);
+  if (i >= 0) recShareSelected.splice(i, 1); else recShareSelected.push(key);
+  renderRecShareChips();
+  document.getElementById('recShareModeRow').style.display = recShareSelected.length > 0 ? 'block' : 'none';
+}
+
+function setRecShareMode(mode) {
+  recShareMode = mode;
+  document.getElementById('recShareEqBtn').className = 'type-btn expense' + (mode==='equal'?' active':'');
+  document.getElementById('recShareCuBtn').className = 'type-btn income' + (mode==='custom'?' active':'');
+  document.getElementById('recShareCustomRow').style.display = mode==='custom' ? 'block' : 'none';
+}
+
+function addRecSharePerson() {
+  const n = prompt('ชื่อคน:'); if(!n||!n.trim()) return;
+  const key = 'cx_'+Date.now();
+  bsCustomPeople.push({key, label:n.trim()});
+  localStorage.setItem('bsCustomPeopleV2', JSON.stringify(bsCustomPeople));
+  bsRefreshPeopleData();
+  recShareSelected.push(key);
+  renderRecShareChips();
+  document.getElementById('recShareModeRow').style.display = 'block';
+}
+
 function addRecurring() {
   const name = document.getElementById('recName').value.trim();
   const amount = parseFloat(document.getElementById('recAmount').value);
@@ -2188,7 +2243,10 @@ function addRecurring() {
   if (!name || isNaN(amount) || amount<=0 || isNaN(day) || day<1 || day>31) {
     alert('กรุณากรอกรายการ จำนวนเงิน และวันที่ให้ครบ'); return;
   }
-  recurringList.push({ id: genId(), type:recType, name, amount, day, category, months });
+  const shareWith = [...recShareSelected];
+  const shareMode = recShareMode;
+  const shareMyAmt = shareWith.length > 0 && shareMode === 'custom' ? parseFloat(document.getElementById('recShareMyAmt').value||0) : null;
+  recurringList.push({ id: genId(), type:recType, name, amount, day, category, months, shareWith, shareMode, shareMyAmt });
   saveRecurring();
   renderRecurringList();
   document.getElementById('recName').value = '';
@@ -2198,18 +2256,26 @@ function addRecurring() {
   document.getElementById('recCategoryCustom').style.display = 'none';
   document.querySelectorAll('#recCatChips .cat-chip').forEach(c=>c.classList.remove('selected'));
   document.querySelectorAll('.rec-month-cb').forEach(cb=>cb.checked=false);
+  recShareSelected = []; recShareMode = 'equal';
+  renderRecShareChips();
+  document.getElementById('recShareModeRow').style.display = 'none';
+  document.getElementById('recShareMyAmt').value = '';
 }
 
 function renderRecurringList() {
   const months_th = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const container = document.getElementById('recurringList');
   if (recurringList.length === 0) { container.innerHTML = '<div class="empty"><span class="empty-icon">📭</span>ยังไม่มีรายการล่วงหน้า</div>'; return; }
+  const allLabels = Object.assign({me:'เรา',mom:'แม่',partner:'บิว',nong:'น้อง'}, Object.fromEntries(bsCustomPeople.map(p=>[p.key,p.label])));
   container.innerHTML = recurringList.map(r => {
     const mLabel = r.months && r.months.length > 0 ? r.months.map(m=>months_th[m]).join(', ') : 'ทุกเดือน';
+    const shareLabel = r.shareWith && r.shareWith.length > 0
+      ? `<div style="font-size:11px;color:#4F5E62;margin-top:2px">☁️ แชร์กับ: ${r.shareWith.map(k=>allLabels[k]||k).join(', ')} · ${r.shareMode==='equal'?'หารเท่ากัน':'ระบุจำนวนเอง'+(r.shareMyAmt?` (เรา ${fmt(r.shareMyAmt)})`:'')} </div>` : '';
     return `<div style="background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border-left:4px solid ${r.type==='income'?'#4A5A30':'#9A4020'}">
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700;color:var(--text)">${r.name}</div>
         <div style="font-size:11px;color:var(--gray)">วันที่ ${r.day} · ${mLabel} · ${r.category||''}</div>
+        ${shareLabel}
       </div>
       <div style="text-align:right">
         <div style="font-weight:700;color:${r.type==='income'?'#4A5A30':'#9A4020'}">${r.type==='income'?'+':'-'}${fmt(r.amount)}</div>
@@ -2240,7 +2306,16 @@ function applyRecurring() {
     const dateStr = `${y}-${String(monthNum).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const key = `${dateStr}|${r.name}|${r.amount}`;
     if (existingKeys.has(key)) { skipped++; return; }
-    transactions.push({ id: genId(), type: r.type, name: r.name, amount: r.amount, date: dateStr, category: r.category || '📅 ล่วงหน้า', note: 'recurring' });
+    // คำนวณจำนวนของเรา ถ้ามีการแชร์
+    let myAmt = r.amount;
+    if (r.shareWith && r.shareWith.length > 0) {
+      if (r.shareMode === 'equal') {
+        myAmt = Math.round((r.amount / (1 + r.shareWith.length)) * 100) / 100;
+      } else if (r.shareMode === 'custom' && r.shareMyAmt > 0) {
+        myAmt = r.shareMyAmt;
+      }
+    }
+    transactions.push({ id: genId(), type: r.type, name: r.name, amount: myAmt, date: dateStr, category: r.category || '📅 ล่วงหน้า', note: 'recurring' });
     existingKeys.add(key);
     added++;
   });
@@ -3045,42 +3120,7 @@ function getCSVPickerValues() {
   const mIdx = Math.round(monthEl.scrollTop / 44);
   const selectedYear = parseInt(yItems[Math.min(yIdx, yItems.length-1)]?.dataset?.val || new Date().getFullYear());
   const selectedMonth = parseInt(mItems[Math.min(mIdx, mItems.length-1)]?.dataset?.val ?? 0);
-  return { year: selectedYear, month: selectedMonth };
-}
-let _csvLastYear = null;
-function onCSVPickerScroll() {
-  const yearEl = document.getElementById('csvYearPicker');
-  const yItems = yearEl.querySelectorAll('[data-val]');
-  const yIdx = Math.round(yearEl.scrollTop / 44);
-  const curYear = parseInt(yItems[Math.min(yIdx, yItems.length-1)]?.dataset?.val);
-  if (curYear && curYear !== _csvLastYear) {
-    _csvLastYear = curYear;
-    refreshCSVMonthPicker(curYear, null);
-  }
-  updateCSVPickerLabel();
-}
-function updateCSVPickerLabel() {
-  const {year, month} = getCSVPickerValues();
-  const CSV_MONTHS = ["ทั้งปี","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-  const label = month === 0 ? "ทั้งปี "+year : CSV_MONTHS[month]+" "+year;
-  const el = document.getElementById("csvPickerLabel");
-  if (el) el.textContent = label+" ▲";
-}
-function doExportCSV() { const {year,month}=getCSVPickerValues(); exportCSV(year, month===0 ? -1 : month-1); }
-
-async function syncToCloud() {
-  const el = document.getElementById('syncStatus');
-  el.textContent = '⏳ กำลัง sync...';
-  try {
-    await fbSave();
-    el.textContent = `✅ Sync สำเร็จ! (${transactions.length} รายการ)`;
-  } catch(e) {
-    el.textContent = '❌ Sync ล้มเหลว กรุณาลองใหม่';
-  }
-}
-
-// ========== FIREBASE ==========
-const firebaseConfig = {
+  return const firebaseConfig = {
   apiKey: "AIzaSyCsWUFiXUk-brlRk7oU-keT2eWupPwGO5g",
   authDomain: "income-and-bill.firebaseapp.com",
   projectId: "income-and-bill",
@@ -3091,7 +3131,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// แยก document ตามปี เพื่อไม่ให้เกิน 1MB limit ของ Firestore
 function getTxDoc(year) {
   return db.collection('data').doc('tx_' + year);
 }
@@ -3099,7 +3138,6 @@ const META_DOC = db.collection('data').doc('meta');
 
 async function fbSave() {
   try {
-    // แยก transactions ตามปี
     const byYear = {};
     transactions.forEach(t => {
       const yr = t.date ? t.date.substring(0, 4) : 'unknown';
@@ -3109,7 +3147,6 @@ async function fbSave() {
     const saves = Object.entries(byYear).map(([yr, txs]) =>
       getTxDoc(yr).set({ transactions: txs, updatedAt: Date.now() })
     );
-    // บันทึก meta (bills, people, recurring)
     saves.push(META_DOC.set({
       bills: bsBills,
       customPeople: bsCustomPeople,
@@ -3129,7 +3166,6 @@ async function fbLoad() {
     const meta = metaSnap.data();
     const years = meta.years || [];
 
-    // โหลด transactions จากทุกปี
     const txSnaps = await Promise.all(years.map(yr => getTxDoc(yr).get()));
     let allTx = [];
     txSnaps.forEach(snap => {
@@ -3160,7 +3196,7 @@ async function fbLoad() {
       localStorage.setItem('customPeople', JSON.stringify(customPeople));
       changed = true;
     }
-    if (Array.isArray(meta.recurringList)) {
+    if (Array.isArray(meta.recurringList) && meta.recurringList.length >= recurringList.length) {
       recurringList = meta.recurringList;
       localStorage.setItem('recurring', JSON.stringify(recurringList));
       changed = true;
