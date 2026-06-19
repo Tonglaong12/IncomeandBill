@@ -3120,7 +3120,23 @@ function getCSVPickerValues() {
   const mIdx = Math.round(monthEl.scrollTop / 44);
   const selectedYear = parseInt(yItems[Math.min(yIdx, yItems.length-1)]?.dataset?.val || new Date().getFullYear());
   const selectedMonth = parseInt(mItems[Math.min(mIdx, mItems.length-1)]?.dataset?.val ?? 0);
-  return const firebaseConfig = {
+  return { year: selectedYear, month: selectedMonth };
+}
+function doExportCSV() { const {year,month}=getCSVPickerValues(); exportCSV(year, month===0 ? -1 : month-1); }
+
+// ========== FIREBASE ==========
+async function syncToCloud() {
+  const el = document.getElementById('syncStatus');
+  el.textContent = '⏳ กำลัง sync...';
+  try {
+    await fbSave();
+    el.textContent = `✅ Sync สำเร็จ! (${transactions.length} รายการ)`;
+  } catch(e) {
+    el.textContent = '❌ Sync ล้มเหลว กรุณาลองใหม่';
+  }
+}
+
+const firebaseConfig = {
   apiKey: "AIzaSyCsWUFiXUk-brlRk7oU-keT2eWupPwGO5g",
   authDomain: "income-and-bill.firebaseapp.com",
   projectId: "income-and-bill",
