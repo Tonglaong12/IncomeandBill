@@ -3090,51 +3090,78 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const FB_DOC = db.collection('data').doc('main');
+
+// แยก document ตามปี เพื่อไม่ให้เกิน 1MB limit ของ Firestore
+function getTxDoc(year) {
+  return db.collection('data').doc('tx_' + year);
+}
+const META_DOC = db.collection('data').doc('meta');
 
 async function fbSave() {
   try {
-    await FB_DOC.set({
-      transactions: transactions,
+    // แยก transactions ตามปี
+    const byYear = {};
+    transactions.forEach(t => {
+      const yr = t.date ? t.date.substring(0, 4) : 'unknown';
+      if (!byYear[yr]) byYear[yr] = [];
+      byYear[yr].push(t);
+    });
+    const saves = Object.entries(byYear).map(([yr, txs]) =>
+      getTxDoc(yr).set({ transactions: txs, updatedAt: Date.now() })
+    );
+    // บันทึก meta (bills, people, recurring)
+    saves.push(META_DOC.set({
       bills: bsBills,
       customPeople: bsCustomPeople,
       customPeopleMain: customPeople,
       recurringList: recurringList,
+      years: Object.keys(byYear),
       updatedAt: Date.now()
-    });
+    }));
+    await Promise.all(saves);
   } catch(e) { console.warn('Firebase save error', e); }
 }
 
 async function fbLoad() {
   try {
-    const snap = await FB_DOC.get();
-    if (!snap.exists) return;
-    const d = snap.data();
+    const metaSnap = await META_DOC.get();
+    if (!metaSnap.exists) return;
+    const meta = metaSnap.data();
+    const years = meta.years || [];
+
+    // โหลด transactions จากทุกปี
+    const txSnaps = await Promise.all(years.map(yr => getTxDoc(yr).get()));
+    let allTx = [];
+    txSnaps.forEach(snap => {
+      if (snap.exists && Array.isArray(snap.data().transactions)) {
+        allTx = allTx.concat(snap.data().transactions);
+      }
+    });
+
     let changed = false;
-    if (Array.isArray(d.transactions) && d.transactions.length > transactions.length) {
-      // โหลดจาก Firestore เฉพาะตอนที่ Firestore มีข้อมูลมากกว่า local
-      transactions = d.transactions;
+    if (allTx.length > transactions.length) {
+      transactions = allTx;
       localStorage.setItem('transactions', JSON.stringify(transactions));
       changed = true;
     }
-    if (Array.isArray(d.bills)) {
-      bsBills = d.bills;
+    if (Array.isArray(meta.bills)) {
+      bsBills = meta.bills;
       localStorage.setItem(BS_KEY, JSON.stringify(bsBills));
       changed = true;
     }
-    if (Array.isArray(d.customPeople)) {
-      bsCustomPeople = d.customPeople;
+    if (Array.isArray(meta.customPeople)) {
+      bsCustomPeople = meta.customPeople;
       localStorage.setItem('bsCustomPeopleV2', JSON.stringify(bsCustomPeople));
       bsRefreshPeopleData();
       changed = true;
     }
-    if (Array.isArray(d.customPeopleMain)) {
-      customPeople = d.customPeopleMain;
+    if (Array.isArray(meta.customPeopleMain)) {
+      customPeople = meta.customPeopleMain;
       localStorage.setItem('customPeople', JSON.stringify(customPeople));
       changed = true;
     }
-    if (Array.isArray(d.recurringList)) {
-      recurringList = d.recurringList;
+    if (Array.isArray(meta.recurringList)) {
+      recurringList = meta.recurringList;
       localStorage.setItem('recurring', JSON.stringify(recurringList));
       changed = true;
     }
