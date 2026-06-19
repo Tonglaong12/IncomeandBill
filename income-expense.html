@@ -706,6 +706,10 @@
       <button class="btn" style="width:100%;font-size:15px;padding:14px;background:#4F5E62;color:#F5ECD8" onclick="closeModal('settingsModal');openRecurringModal()">
         📋 ค่าใช้จ่ายล่วงหน้า
       </button>
+      <button class="btn" style="width:100%;font-size:15px;padding:14px;background:#2E7D32;color:#fff" onclick="syncToCloud()">
+        ☁️ Sync ข้อมูลขึ้น Cloud
+      </button>
+      <div id="syncStatus" style="font-size:12px;color:#6B5E52;text-align:center;min-height:18px"></div>
       <button class="btn btn-danger" style="width:100%;font-size:15px;padding:14px" onclick="clearCurrentMonth()">
         🗑️ ล้างข้อมูลเดือนที่เลือก
       </button>
@@ -3063,6 +3067,17 @@ function updateCSVPickerLabel() {
   if (el) el.textContent = label+" ▲";
 }
 function doExportCSV() { const {year,month}=getCSVPickerValues(); exportCSV(year, month===0 ? -1 : month-1); }
+
+async function syncToCloud() {
+  const el = document.getElementById('syncStatus');
+  el.textContent = '⏳ กำลัง sync...';
+  try {
+    await fbSave();
+    el.textContent = `✅ Sync สำเร็จ! (${transactions.length} รายการ)`;
+  } catch(e) {
+    el.textContent = '❌ Sync ล้มเหลว กรุณาลองใหม่';
+  }
+}
 
 // ========== FIREBASE ==========
 const firebaseConfig = {
