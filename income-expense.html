@@ -2279,7 +2279,10 @@ function renderRecurringList() {
       </div>
       <div style="text-align:right">
         <div style="font-weight:700;color:${r.type==='income'?'#4A5A30':'#9A4020'}">${r.type==='income'?'+':'-'}${fmt(r.amount)}</div>
-        <button onclick="deleteRecurring('${r.id}')" style="background:#E8D0C0;border:none;border-radius:6px;padding:2px 8px;font-size:11px;color:#9A4020;cursor:pointer;margin-top:4px">ลบ</button>
+        <div style="display:flex;gap:4px;margin-top:4px;justify-content:flex-end">
+          <button onclick="editRecurring('${r.id}')" style="background:#D4C4A8;border:none;border-radius:6px;padding:2px 8px;font-size:11px;color:#3E2A1A;cursor:pointer">แก้ไข</button>
+          <button onclick="deleteRecurring('${r.id}')" style="background:#E8D0C0;border:none;border-radius:6px;padding:2px 8px;font-size:11px;color:#9A4020;cursor:pointer">ลบ</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2289,6 +2292,38 @@ function deleteRecurring(id) {
   recurringList = recurringList.filter(r => String(r.id) !== String(id));
   saveRecurring();
   renderRecurringList();
+}
+
+function editRecurring(id) {
+  const r = recurringList.find(r => String(r.id) === String(id));
+  if (!r) return;
+  // โหลดค่าเดิมลงฟอร์ม
+  setRecType(r.type);
+  document.getElementById('recName').value = r.name;
+  document.getElementById('recAmount').value = r.amount;
+  document.getElementById('recDay').value = r.day;
+  document.getElementById('recCategory').value = r.category || '';
+  document.getElementById('recCategoryCustom').style.display = 'none';
+  // หมวดหมู่
+  document.querySelectorAll('#recCatChips .cat-chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.val === r.category);
+  });
+  // เดือน
+  document.querySelectorAll('.rec-month-cb').forEach(cb => {
+    cb.checked = r.months && r.months.includes(parseInt(cb.value));
+  });
+  // แชร์
+  recShareSelected = r.shareWith ? [...r.shareWith] : [];
+  recShareMode = r.shareMode || 'equal';
+  renderRecShareChips();
+  document.getElementById('recShareModeRow').style.display = recShareSelected.length > 0 ? 'block' : 'none';
+  setRecShareMode(recShareMode);
+  if (r.shareMyAmt) document.getElementById('recShareMyAmt').value = r.shareMyAmt;
+  // ลบรายการเก่าออก แล้วเลื่อนไปที่ฟอร์ม
+  recurringList = recurringList.filter(rx => String(rx.id) !== String(id));
+  saveRecurring();
+  renderRecurringList();
+  document.getElementById('recName').scrollIntoView({ behavior: 'smooth' });
 }
 
 function applyRecurring() {
