@@ -982,14 +982,29 @@ function addCustomPerson(name) {
 }
 
 // Build a share pill element
-function makePill(key, name, clickFn, extraClass='') {
+function makePill(key, name, clickFn, extraClass='', deletable=false) {
   const el = document.createElement('div');
   el.className = 'tx-share-pill' + (extraClass ? ' ' + extraClass : '');
   el.dataset.key = key;
   el.textContent = name;
   el.onclick = () => clickFn(el);
+  if (deletable) {
+    el.ondblclick = (e) => {
+      e.stopPropagation();
+      if (confirm(`ลบ "${name}" ออกจากรายชื่อไหม?`)) {
+        customPeople = customPeople.filter(p => p.key !== key);
+        saveCustomPeople();
+        const sw = getShareWith().filter(k => k !== key);
+        const pf = getPayFor() === key ? null : getPayFor();
+        renderSharePills(sw);
+        renderPayForPills(pf);
+      }
+    };
+  }
   return el;
 }
+
+let addPersonSource = 'share'; // 'share' | 'payfor'
 
 // Render pills for shareWith container (multi-select)
 function renderSharePills(selectedKeys) {
@@ -1003,16 +1018,15 @@ function renderSharePills(selectedKeys) {
     container.appendChild(el);
   });
   customPeople.forEach(p => {
-    const el = makePill(p.key, p.name, (el) => { el.classList.toggle('sel'); updateShareAmountHint(); });
+    const el = makePill(p.key, p.name, (el) => { el.classList.toggle('sel'); updateShareAmountHint(); }, '', true);
     if ((selectedKeys||[]).includes(p.key)) el.classList.add('sel');
     container.appendChild(el);
   });
-  // ➕ add person button
   const addBtn = document.createElement('div');
   addBtn.className = 'tx-share-pill';
   addBtn.style.cssText = 'border-style:dashed;color:#A07828;background:transparent;font-weight:700';
   addBtn.textContent = '➕ เพิ่ม';
-  addBtn.onclick = () => showAddPersonInput();
+  addBtn.onclick = () => { addPersonSource = 'share'; showAddPersonInput(); };
   container.appendChild(addBtn);
 }
 
@@ -1028,16 +1042,15 @@ function renderPayForPills(selectedKey) {
     container.appendChild(el);
   });
   customPeople.forEach(p => {
-    const el = makePill(p.key, p.name, (el) => togglePayForPill(el));
+    const el = makePill(p.key, p.name, (el) => togglePayForPill(el), '', true);
     if (selectedKey === p.key) el.classList.add('sel');
     container.appendChild(el);
   });
-  // ➕ add person button
   const addBtn = document.createElement('div');
   addBtn.className = 'tx-share-pill';
   addBtn.style.cssText = 'border-style:dashed;color:#A07828;background:transparent;font-weight:700';
   addBtn.textContent = '➕ เพิ่ม';
-  addBtn.onclick = () => showAddPersonInput();
+  addBtn.onclick = () => { addPersonSource = 'payfor'; showAddPersonInput(); };
   container.appendChild(addBtn);
 }
 
@@ -1073,10 +1086,14 @@ function confirmAddPerson() {
   if (!name) return;
   const key = addCustomPerson(name);
   document.getElementById('addPersonBox').style.display = 'none';
-  // Re-render pills keeping current selections
-  const currentSelected = getShareWith();
-  renderSharePills(currentSelected);
-  renderPayForPills(getPayFor());
+  // Re-render เฉพาะ section ที่กดเพิ่ม
+  if (addPersonSource === 'share') {
+    const currentSelected = getShareWith();
+    currentSelected.push(key); // auto-select คนที่เพิ่งเพิ่ม
+    renderSharePills(currentSelected);
+  } else {
+    renderPayForPills(key); // auto-select
+  }
 }
 
 // ========== SHARE WITH ==========
